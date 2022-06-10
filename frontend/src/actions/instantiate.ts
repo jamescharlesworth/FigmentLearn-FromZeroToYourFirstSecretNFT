@@ -19,6 +19,7 @@ export const instantiate = async (props: InstantiateProps): Promise<string> => {
         codeHash,
         label,
     } = props
+    
     const client = await getClient();
 
     const initMsg = {
@@ -34,14 +35,17 @@ export const instantiate = async (props: InstantiateProps): Promise<string> => {
             enable_burn: true
         },
     };
-    const instantiateResponse = await client.tx.compute.instantiateContract({
+    const opts = {
         sender: client.address,
         codeId: codeId,
         codeHash, // optional but way faster
         initMsg,
         label,
         initFunds: [], // optional
-    }, {
+    };
+    console.log('trying to instantiat with:')
+    console.log(opts);
+    const instantiateResponse = await client.tx.compute.instantiateContract(opts, {
         gasLimit: 100_000,
     });
   
