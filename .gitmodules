@@ -1,0 +1,3 @@
+[submodule "contract/my-snip721"]
+	path = contract/my-snip721
+	url = https://github.com/baedrik/snip721-reference-impl.git
