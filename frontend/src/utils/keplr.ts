@@ -70,6 +70,7 @@ export const login = async (): Promise<SecretNetworkClient> => {
     const keplrOfflineSigner = window.getOfflineSignerOnlyAmino(chainId);
 
     const [{ address }] = await keplrOfflineSigner.getAccounts();
+    console.log(address);
     secretClient = await SecretNetworkClient.create({
         grpcWebUrl,
         chainId,
