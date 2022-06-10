@@ -7,7 +7,7 @@ const fs = require("fs");
 const { program } = require('commander');
 
 // Load environment variables
-require("dotenv").config({ path: '../.env'});
+require("dotenv").config({ path: '../.env.production'});
 
 
 const main = async ({ name = '', symbol = '', entropy ='', label = "sSCRT" } = {}) => {
@@ -30,64 +30,36 @@ const main = async ({ name = '', symbol = '', entropy ='', label = "sSCRT" } = {
   const wasmByteCode = fs.readFileSync(
     path.join(__dirname, '/../my-snip721/contract.wasm.gz')
   );
-  const tx = await secretjs.tx.compute.storeCode(
-    {
-      sender: wallet.address,
-      wasmByteCode,
-      source: "",
-      builder: "",
-    },
-    {
-      gasLimit: 5_000_000,
-    },
-  );
-  const codeId = Number(
-    tx.arrayLog.find((log) => log.type === "message" && log.key === "code_id")
-      .value,
-  );
-  console.log(`codeId: ${codeId}`);
-
-  const codeHash = await secretjs.query.compute.codeHash(codeId);
-  console.log(`codeHash: ${codeHash}`)
-
-  // Get the code ID from the receipt
-  const initMsg = {
-    /// name of token contract
-    name,
-    /// token contract symbol
-    symbol,
-    /// entropy used for prng seed
-    entropy,
-    /// optional privacy configuration for the contract
-    config: {
-      public_owner: true,
-      enable_burn: true
-    },
-  };
-  console.log('instantiating contract');
-  const instantiateResponse = await secretjs.tx.compute.instantiateContract(
-    {
-      sender: wallet.address,
-      codeId: codeId,
-      codeHash, // optional but way faster
-      initMsg,
-      label,
-      initFunds: [], // optional
-    },
-    {
-      gasLimit: 100_000,
-    },
-  );
+   try {
+    const tx = await secretjs.tx.compute.storeCode(
+      {
+        sender: wallet.address,
+        wasmByteCode,
+        source: "",
+        builder: "",
+      },
+      {
+        gasLimit: 5_000_000,
+      },
+    );
+    const codeId = Number(
+      tx.arrayLog.find((log) => log.type === "message" && log.key === "code_id")
+        .value,
+    );
+    console.log(`codeId: ${codeId}`);
   
-  if (instantiateResponse?.arrayLog) {
-    const contractAddress = instantiateResponse.arrayLog.find(
-      (log) => log.type === "message" && log.key === "contract_address",
-    ).value;
-    console.log(`contractAddress: ${contractAddress}`);  
-    console.log('Created contract succesfully!');
-  } else if (instantiateResponse?.rawLog) {
-    console.log(instantiateResponse.rawLog);
-  }
+    const codeHash = await secretjs.query.compute.codeHash(codeId);
+    console.log(`codeHash: ${codeHash}`)
+  
+
+    console.log('codeId', codeId);
+   } catch(ex) {
+     debugger;
+     console.log(ex);
+   }
+  
+
+   console.log('Created contract succesfully!');
 }
 
 

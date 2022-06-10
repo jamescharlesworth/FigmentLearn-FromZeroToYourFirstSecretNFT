@@ -8,10 +8,8 @@ const rest = import.meta.env.VITE_SECRET_KEPLR_REST_URL;
 
 let secretClient: SecretNetworkClient;
 
-export const login = async (): Promise<SecretNetworkClient> => {
-    if (secretClient) {
-        return secretClient;
-    }
+
+const suggestChain = async () => {
     await window.keplr.experimentalSuggestChain({
         chainId,
         chainName,
@@ -58,6 +56,15 @@ export const login = async (): Promise<SecretNetworkClient> => {
         },
         features: ["secretwasm", "stargate", "ibc-transfer", "ibc-go"],
     });
+}
+export const login = async (): Promise<SecretNetworkClient> => {
+    if (secretClient) {
+        return secretClient;
+    }
+    if (chainId !== 'secret-4'){
+        await suggestChain()
+    }
+    
     await window.keplr.enable(chainId);
 
     const keplrOfflineSigner = window.getOfflineSignerOnlyAmino(chainId);
