@@ -114,11 +114,22 @@
 			console.log(ex);
 		}
 	}
-	const saveContractAddress = (evt) => {
+	const saveContractAddress = async (evt) => {
 		const address = evt.target.value
 		console.log('new address', address);
 		window.localStorage.setItem('contractAddress', address);
 		contractAddress = address;
+		try {
+			const resp = await getTokens({
+				contractAddress,
+				codeHash
+			});
+			tokens = resp.token_list.tokens;
+		} catch(ex) {
+			console.log(ex);
+			tokens = [];
+		}
+
 	}
 	const onBurn = async () => {
 		const resp = await getTokens({
