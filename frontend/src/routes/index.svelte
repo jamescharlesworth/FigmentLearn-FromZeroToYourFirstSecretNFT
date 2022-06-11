@@ -7,7 +7,7 @@
 	import { setViewingKey } from '../actions/set-viewingkey';
 	import { instantiate } from '../actions/instantiate';
 	import Code from '../components/code.svelte';
-import { Wallet } from 'secretjs';
+	import { Wallet } from 'secretjs';
 
 	let contractAddress = ''
 	const codeHash = import.meta.env.VITE_SECRET_CONTRACT_HASH as string;
