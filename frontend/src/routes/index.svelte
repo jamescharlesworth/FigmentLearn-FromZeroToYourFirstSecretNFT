@@ -12,7 +12,7 @@
 	let contractAddress = ''
 	const codeHash = import.meta.env.VITE_SECRET_CONTRACT_HASH as string;
 	const codeId = import.meta.env.VITE_SECRET_CODE_ID;
-	
+	const defaultContractAddress = import.meta.env.VITE_SECRTE_DEFAULT_CONTRACT_ADDRESS;
 	let viewingKey = 'your_viewing_key';
 	let newAgentName = 'AgentMcSecret';
 	let tokens = [];
@@ -209,8 +209,8 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 			{/if}
 			<div class="mt-20">
 				<h4>Or Use Existing Contract</h4>
-				<p>Or set an existing the contract address to manually, try using contract address <code class="inline">secret1dmktdncjquf4kfg9ymfvu7qqyj6gd645g9kfg4</code></p>
-
+				<p>Or set an existing the contract address to manually, try using contract address <code class="inline">{defaultContractAddress}</code></p>
+				<p>This will allow you to view the NFT's using the viewing key.</p>
 				<div>
 					<input placeholder="Paste contract address" name="contractAddress" class="full-width border-box  border-solid p-15 box-box" on:blur={saveContractAddress}>
 				</div>
@@ -221,13 +221,13 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 		<hr class="break mt-20" />
 		<div>
 				<h1>Set Viewing Key</h1>
-				<p>AS the contact owner you dont need to </p>
+				<p>As the contact owner you dont need to set the viewing key.  It has been set to <code class="inline">your_private_key</code> for the contract example here.</p>
 				<p>You can choose to provide someone else access to the private data on the contract through the viewing key.</p>
 				
 				<div class="p-15 border-solid">
 					<input name="viewingKey" class="full-width border-box  border-solid p-15 box-box" bind:value={viewingKey}>
 				</div>
-				<button class="full-width p-15 border-solid text-center text-bold" disabled={minting}  on:click={handleClickSetViewingKey}>2. Set ViewingKey</button>	
+				<button class="full-width p-15 border-solid text-center text-bold" disabled={minting}  on:click={handleClickSetViewingKey}>2. Set ViewingKey (skip if using contract example above)</button>	
 			
 		</div>
 		<hr class="break mt-20" />
