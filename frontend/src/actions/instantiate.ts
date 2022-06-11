@@ -21,6 +21,10 @@ export const instantiate = async (props: InstantiateProps): Promise<string> => {
     } = props
     
     const client = await getClient();
+    let hash = codeHash;
+    if (!hash) {
+        hash = await client.query.compute.codeHash(codeId);
+    }
 
     const initMsg = {
         /// name of token contract
@@ -38,7 +42,7 @@ export const instantiate = async (props: InstantiateProps): Promise<string> => {
     const opts = {
         sender: client.address,
         codeId: codeId,
-        codeHash, // optional but way faster
+        codeHash: hash, // optional but way faster
         initMsg,
         label,
         initFunds: [], // optional
