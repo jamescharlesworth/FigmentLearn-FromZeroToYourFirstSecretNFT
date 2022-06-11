@@ -87,3 +87,7 @@ export const login = async (): Promise<SecretNetworkClient> => {
 export const getClient = (): SecretNetworkClient => {
     return secretClient;
 }
+
+export const isLoggedIn = (): Boolean => {
+    return !!secretClient;
+}
