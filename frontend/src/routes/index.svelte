@@ -43,7 +43,17 @@
 		secretjs = await login();
 		loggedIn = true;
 		window.localStorage.setItem('walletAddress', secretjs.address);
-		walletAddress = secretjs.address
+		walletAddress = secretjs.address;
+		try {
+			const resp = await getTokens({
+				contractAddress,
+				codeHash
+			});
+			tokens = resp.token_list.tokens;
+		} catch(ex) {
+			console.log(ex);
+			tokens = [];
+		}
 	};
 	const handleLogout = async () => {
 		secretjs = await login();
