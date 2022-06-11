@@ -12,7 +12,7 @@
 	let contractAddress = ''
 	const codeHash = import.meta.env.VITE_SECRET_CONTRACT_HASH as string;
 	const codeId = import.meta.env.VITE_SECRET_CODE_ID;
-	const defaultContractAddress = import.meta.env.VITE_SECRTE_DEFAULT_CONTRACT_ADDRESS;
+	const defaultContractAddress = import.meta.env.VITE_SECRET_DEFAULT_CONTRACT_ADDRESS;
 	let viewingKey = 'your_viewing_key';
 	let newAgentName = 'AgentMcSecret';
 	let tokens = [];
