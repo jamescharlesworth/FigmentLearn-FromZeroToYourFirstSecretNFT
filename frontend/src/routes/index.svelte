@@ -137,7 +137,7 @@ import { Wallet } from 'secretjs';
 				You can read more about the process in detail (uploading, instantiating and executing) on <a href="https://docs.scrt.network/dev/quickstart.html#create-initial-smart-contract">docs.srct.network</a>.
 			</p>
 			<p>For the purpose of this example the contract has already been uploaded to testnet and
-				can be found at code id <code>9314</code>. This utilizes the uploaded contract and allows
+				can be found at code id <code>{codeId}</code>. This utilizes the uploaded contract and allows
 				the user to instantiate and execute 
 			</p>
 		</div>
