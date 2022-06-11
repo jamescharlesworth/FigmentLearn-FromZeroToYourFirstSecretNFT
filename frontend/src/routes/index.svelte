@@ -113,7 +113,12 @@
 		} catch(ex) {
 			console.log(ex);
 		}
-
+	}
+	const saveContractAddress = (evt) => {
+		const address = evt.target.value
+		console.log('new address', address);
+		window.localStorage.setItem('contractAddress', address);
+		contractAddress = address;
 	}
 	const onBurn = async () => {
 		const resp = await getTokens({
@@ -170,6 +175,7 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 			<p>Instantiation can also be done using the <a href="https://github.com/scrtlabs/secret.js#secretjstxcomputeinstantiatecontract">secretjs</a> library as done in this example.</p>
 			<p>Click the Instantiate button bellow to do so. (this app stores the contract address in localStorage to persist across reloads. Your contract will
 				be different than other users unless you share the contract address with them).</p>
+		
 			<button class="full-width p-15 border-solid text-center text-bold" on:click={handleCreateNewContract}>1. Instantiate New Contract</button>
 			{#if contractAddress}
 			<div class="p-20 border-solid">
@@ -180,13 +186,22 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 				</div>
 			</div>
 			{/if}
+			<div class="mt-20">
+				<h4>Or Use Existing Contract</h4>
+				<p>Or set an existing the contract address to manually, try using contract address <code class="inline">secret1dmktdncjquf4kfg9ymfvu7qqyj6gd645g9kfg4</code></p>
+
+				<div>
+					<input placeholder="Paste contract address" name="contractAddress" class="full-width border-box  border-solid p-15 box-box" on:blur={saveContractAddress}>
+				</div>
+			</div>
+			
+
 		</div>
 		<hr class="break mt-20" />
 		<div>
 				<h1>Set Viewing Key</h1>
 				<p>AS the contact owner you dont need to </p>
 				<p>You can choose to provide someone else access to the private data on the contract through the viewing key.</p>
-				<p>This app hard codes the viewing key as "foobar"</p>
 				
 				<div class="p-15 border-solid">
 					<input name="viewingKey" class="full-width border-box  border-solid p-15 box-box" bind:value={viewingKey}>
@@ -277,6 +292,9 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 
 	.border-solid {
 		border: 1px solid #ccc;
+	}
+	.inline {
+		display:inline;
 	}
 
 	.full-width {

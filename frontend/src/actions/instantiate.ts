@@ -22,9 +22,10 @@ export const instantiate = async (props: InstantiateProps): Promise<string> => {
     
     const client = await getClient();
     let hash = codeHash;
-    // if (!hash) {
-    //     hash = await client.query.compute.codeHash(codeId);
-    // }
+    if (!hash) {
+        hash = await client.query.compute.codeHash(codeId);
+        console.log('code hash', hash);
+    }
 
     const initMsg = {
         /// name of token contract
