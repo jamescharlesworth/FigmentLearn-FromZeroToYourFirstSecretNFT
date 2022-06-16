@@ -31,7 +31,12 @@ type MintProps = {
     codeHash: string,
 }
 
-export const mint = async ({ agentName, contractAddress, codeHash }: MintProps): Promise<void> => {
+type MintResponse = {
+    error?: string
+    success: boolean
+}
+
+export const mint = async ({ agentName, contractAddress, codeHash }: MintProps): Promise<MintResponse> => {
     const secretjs = await getClient();
     const background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
     const cloth = clothes[Math.floor(Math.random() * clothes.length)];
@@ -66,5 +71,9 @@ export const mint = async ({ agentName, contractAddress, codeHash }: MintProps):
     const resp = await secretjs.tx.broadcast([mintNftMsg], {
         gasLimit: 200_000,
     });
-    console.log('minted', resp);
+
+    if (resp.jsonLog?.generic_err?.msg) {
+        return { error: resp.jsonLog?.generic_err.msg, success: false }  
+    }
+    return { success: true };
 }

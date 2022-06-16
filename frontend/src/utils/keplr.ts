@@ -57,6 +57,11 @@ const suggestChain = async () => {
         features: ["secretwasm", "stargate", "ibc-transfer", "ibc-go"],
     });
 }
+
+export const logout = () => {
+    secretClient = null;
+}
+
 export const login = async (): Promise<SecretNetworkClient> => {
     if (secretClient) {
         return secretClient;

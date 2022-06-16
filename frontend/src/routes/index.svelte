@@ -1,13 +1,16 @@
 <script lang="ts">
 	import Agent from '../components/agent.svelte';
 	import { onMount } from 'svelte';
-	import { getClient, login, isLoggedIn } from '../utils/keplr';
+	import { getClient, login, isLoggedIn, logout } from '../utils/keplr';
 	import { getTokens } from '../actions/get-tokens';
 	import { mint } from '../actions/mint';
 	import { setViewingKey } from '../actions/set-viewingkey';
 	import { instantiate } from '../actions/instantiate';
+	import { contractInfo } from '../actions/contract-info';
+	import Error from '../components/error.svelte';
 	import Code from '../components/code.svelte';
 	import { Wallet } from 'secretjs';
+
 
 	let contractAddress = ''
 	const codeHash = import.meta.env.VITE_SECRET_CONTRACT_HASH as string;
@@ -15,18 +18,30 @@
 	const defaultContractAddress = import.meta.env.VITE_SECRET_DEFAULT_CONTRACT_ADDRESS;
 	let viewingKey = 'your_viewing_key';
 	let newAgentName = 'AgentMcSecret';
+	let contractInfoData;
 	let tokens = [];
 
 	let secretjs;
 	let walletAddress;
 	let loggedIn = isLoggedIn();
+
+
+	const getContractData = async (addr = contractAddress) => {
+		if (addr) {
+			const resp = await contractInfo(addr);
+			contractInfoData = resp.ContractInfo;
+		}
+	}
+
+	// $: contractAddress && getContractData()
+
 	onMount(async () => {
 		contractAddress = window.localStorage.getItem('contractAddress');
 		const vk = window.localStorage.getItem('viewingKey');
 		if (vk) viewingKey = vk;
 		walletAddress = window.localStorage.getItem('walletAddress');
 		if (walletAddress) {
-			await login();
+			secretjs = await login();
 			loggedIn = true;
 			if (contractAddress) {
 				const resp = await getTokens({
@@ -35,41 +50,70 @@
 				});
 				tokens = resp.token_list.tokens;
 			}
+			// 
+			if (contractAddress) {
+				await getContractData(contractAddress);
+			}
+			walletAddress = secretjs.address;
+			updatedCreator();
+		
 		}
 
+
+
 	});
+	console.log('wal', walletAddress);
 
 	const handleLogin = async () => {
 		secretjs = await login();
 		loggedIn = true;
 		window.localStorage.setItem('walletAddress', secretjs.address);
 		walletAddress = secretjs.address;
-		try {
-			const resp = await getTokens({
-				contractAddress,
-				codeHash
-			});
-			tokens = resp.token_list.tokens;
-		} catch(ex) {
-			console.log(ex);
-			tokens = [];
+		if (contractAddress) {
+			try {
+				const resp = await getTokens({
+					contractAddress,
+					codeHash
+				});
+				tokens = resp.token_list.tokens;
+				await getContractData()
+				updatedCreator();
+			} catch(ex) {
+				console.log(ex);
+				tokens = [];
+			}
 		}
+
 	};
+
+	let isCreator;
+
+	const updatedCreator = () => {
+		isCreator = walletAddress
+		&& contractInfoData?.creator
+		&& contractInfoData?.creator === walletAddress;
+	}
+	
 	const handleLogout = async () => {
-		secretjs = await login();
+		logout()
 		loggedIn = false;
 		window.localStorage.setItem('walletAddress', '');
 		walletAddress = ''
 	};
 
 	let minting = false;
-
+	let mintError;
 
 	const mintAgent = async () => {
 		minting = true;
 
 		try {
-			await mint({ agentName: newAgentName, contractAddress, codeHash });
+			const resp = await mint({ agentName: newAgentName, contractAddress, codeHash });
+			if (resp.error) {
+				mintError = resp.error;
+			} else {
+				mintError = null;
+			}
 		} catch(ex) {
 			console.log(ex);
 		}
@@ -80,6 +124,7 @@
 		});
 		tokens = resp.token_list.tokens;
 		minting = false;
+		updatedCreator();
 	};
 
 	const handleClickSetViewingKey = async () => {
@@ -108,6 +153,7 @@
 		window.localStorage.setItem('viewingKey', 'your_viewing_key');
 		contractAddress = ''
 		tokens = [];
+		updatedCreator();
 		viewingKey = 'your_viewing_key';
 	}
 	const handleCreateNewContract = async () => {
@@ -120,6 +166,7 @@
 			console.log('new address', address);
 			window.localStorage.setItem('contractAddress', address);
 			contractAddress = address;
+			updatedCreator();
 		} catch(ex) {
 			console.log(ex);
 		}
@@ -148,7 +195,6 @@
 		});
 		tokens = resp.token_list.tokens;
 	}
-	console.log(loggedIn, 'asdf')
 </script>
 
 <div class="container">
@@ -177,6 +223,7 @@
 			</p>
 			{#if loggedIn}
 				<button class="full-width p-15 border-solid text-center text-bold" on:click={handleLogout}>Logout (Logged in to {walletAddress})</button>
+		
 			{:else}
 				<button class="full-width p-15 border-solid text-center text-bold" on:click={handleLogin}>1. Login</button>
 			{/if}
@@ -187,13 +234,7 @@
 		<hr class="break mt-20" />
 		<div>
 			<h1>Instantiating the Contract</h1>
-			<p>Instantiation can be done via the command line secret cli tool as follows:</p>
-			<Code>
-INIT='&#123;"count": 100000000&#125';
-CODE_ID=1
-secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y --keyring-backend test
-			</Code>
-			<p>Instantiation can also be done using the <a href="https://github.com/scrtlabs/secret.js#secretjstxcomputeinstantiatecontract">secretjs</a> library as done in this example.</p>
+			<p>Instantiation can be done using the <a href="https://github.com/scrtlabs/secret.js">secretjs</a> library as done in <a href="https://github.com/scrtlabs/secret.js#secretjstxcomputeinstantiatecontract">this</a> example.</p>
 			<p>Click the Instantiate button bellow to do so. (this app stores the contract address in localStorage to persist across reloads. Your contract will
 				be different than other users unless you share the contract address with them).</p>
 		
@@ -205,6 +246,28 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 					<input type="text" value={contractAddress} disabled class="px-5 flex-grow mr-5" />
 					<button on:click={handleDeleteContract}>Delete</button>
 				</div>
+				<div class="mt-20">
+					<p>contract info for {contractAddress}</p>
+				</div>
+				{#if contractInfoData}
+				<div>
+					<ul>
+						<li>codeId: {contractInfoData.codeId}</li>
+						<li>creator: {contractInfoData.creator}
+							- 
+							<b>
+							{#if isCreator}
+								Hey, its you!
+							{:else}
+								Someone else
+							{/if}
+							</b>
+
+						</li>
+						<li>label: {contractInfoData.label}</li>
+					</ul>
+				</div>
+				{/if}
 			</div>
 			{/if}
 			<div class="mt-20">
@@ -227,7 +290,12 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 				<div class="p-15 border-solid">
 					<input name="viewingKey" class="full-width border-box  border-solid p-15 box-box" bind:value={viewingKey}>
 				</div>
-				<button class="full-width p-15 border-solid text-center text-bold" disabled={minting}  on:click={handleClickSetViewingKey}>2. Set ViewingKey (skip if using contract example above)</button>	
+				<button class="full-width p-15 border-solid text-center text-bold" disabled={minting || !isCreator}  on:click={handleClickSetViewingKey}>
+					2. Set ViewingKey
+					{#if !isCreator}
+						(only the creator (not you) can set the viewing key)
+					{/if}
+				</button>	
 			
 		</div>
 		<hr class="break mt-20" />
@@ -242,8 +310,15 @@ secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y
 			<div class="p-15 border-solid">
 				<input name="newAgentName" class="full-width border-box  border-solid p-15 box-box" bind:value={newAgentName} />
 			</div>
-			<button disabled={minting}  class="full-width p-15 border-solid text-center text-bold"  on:click={mintAgent}>3. Recruit the Agent</button>	
-
+			<button disabled={minting || !isCreator}  class="full-width p-15 border-solid text-center text-bold"  on:click={mintAgent}>
+				3. Recruit the Agent
+				{#if !isCreator}
+					(only the creator (not you) can recruit)
+				{/if}
+			</button>	
+			{#if mintError} 
+				<Error>{mintError}</Error>
+			{/if}
 			
 		</div>
 	<hr class="break mt-20" />

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { getToken } from '../actions/get-token';
 	import { burn } from '../actions/burn';
+	import Error from './error.svelte';
 
 	export let id: number;
 	export let viewingKey: string;
@@ -33,6 +34,7 @@
 	let eye = undefined;
 	let cloth = undefined;
 	let name = undefined;
+	let errorMessage = undefined;
 
 	onMount(async () => {
 		const res = await getToken({
@@ -41,11 +43,17 @@
 			id,
 			viewingKey
 		});
+		if (res.jsonLog?.generic_err?.msg) {
+			errorMessage = res.jsonLog?.generic_err?.msg
+		} else {
+			errorMessage = null;
+			
+		}
 		token = res.nft_dossier;
-		background = token.private_metadata.extension.name;
-		cloth = token.private_metadata.extension.description;
-		eye = token.private_metadata.extension.image;
-		name = token.public_metadata.extension.name;
+		background = token.private_metadata?.extension?.name;
+		cloth = token.private_metadata?.extension?.description;
+		eye = token.private_metadata?.extension?.image;
+		name = token.public_metadata?.extension?.name;
 	});
 
 	const handleBurn = async () => {
@@ -70,6 +78,9 @@
 				<div class="image" style="background-image: url('https://{cloth}.ipfs.dweb.link/')" />
 			</div>
 			<h3 style="text-align: center; padding: 5px;">{name}</h3>
+			{#if errorMessage}
+				<Error>{errorMessage}</Error>
+			{/if}
 			<div>
 				<button class="full-width" on:click={handleBurn}>Burn</button>
 			</div>

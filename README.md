@@ -1,6 +1,6 @@
 # FigmentLearn-FromZeroToYourFirstSecretNFT
 
-This is fork of the <a href="https://learn.figment.io/tutorials/create-your-first-secret-nft">Figment Secret NFT tutorial</a> written by Florian Uhde. Some of the key differences in following that tutorial include:
+This is a fork of the <a href="https://learn.figment.io/tutorials/create-your-first-secret-nft">Figment Secret NFT tutorial</a> written by Florian Uhde. Some of the key differences in following that tutorial include:
 
  - Integration with Keplr wallet
  - No API routes - all transactions are broadcast from the dApp and clientside only
@@ -155,4 +155,6 @@ secretd query tx <TXHASH_OUTPUT_FROM_UPLOAD>
 you will then need to scroll to the top of the output and find the code id:
 ![code id](./docs/find-code-id.png)
 
-At this point we have all we need for our dApp and will instantiate the contract from there using the code id, however you can also instaniate and interact with the contract from the secretd client if you like. There are more docs [here](https://docs.scrt.network/dev/quickstart.html#create-initial-smart-contract) on doing that with another example contract.
+At this point we have all we need for the dApp and will instantiate the contract from there using the code id, however you can also instaniate and interact with the contract from the secretd client if you like. There are more docs [here](https://docs.scrt.network/dev/quickstart.html#create-initial-smart-contract) on doing that with another example contract.
+
+The dApp is located at [https://figment-learn-from-zero-to-your-first-secret-nft.vercel.app/](https://figment-learn-from-zero-to-your-first-secret-nft.vercel.app/).
